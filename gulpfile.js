@@ -40,13 +40,18 @@ var colors = require('colors') ;
     gulp.task('clean', function () {
         return del(['dist']);
     });
-    gulp.task('compile', ['clean'], function () {
-        var js = gulp.src('src/static/scripts/*.js', {base: 'src/static'})
-            .pipe(uglify());
-        var css = gulp.src('src/static/styles/*.less', {base: 'src/static'})
+    gulp.task('compile', ['clean','webpackProduction'], function () {
+        // var js = gulp.src('src/static/scripts/*.js', {base: 'src/static'}).pipe(uglify());
+        var jsStream = gulp.src([
+                'src/static/**/*.js' 
+            ],{
+                base : 'src/static'
+            }) ;
+        var cssStream = gulp.src('src/static/resource/styles/**/*.less', {base: 'src/static'})
             .pipe(less());
-        var img = gulp.src('src/static/images/*.less', {base: 'src/static'});
-        return merge(js, css, img)
+        var imgStream = gulp.src('src/static/resource/images/**', {base: 'src/static'});
+        var fontStream = gulp.src('src/static/resource/fonts/**', {base: 'src/static'});
+        return merge(jsStream, cssStream, imgStream, fontStream)
             .pipe(rev())
             .pipe(gulp.dest('dist/static'))
             .pipe(rev.manifest())
@@ -60,7 +65,7 @@ var colors = require('colors') ;
             .pipe(gulp.dest('dist/tmp'));
     });
     gulp.task('replace', ['compile'], function () {
-        return gulp.src('src/views/*.hbs')
+        return gulp.src('src/views/**/*.hbs')
             .pipe(replace({manifest: gulp.src('dist/tmp/rev-manifest.json')}))
             .pipe(gulp.dest('dist/views'));
     });
@@ -155,5 +160,11 @@ var colors = require('colors') ;
                 console.info( state.toString().info ) ;
             }) ;
         } ) ;
+    }) ;
+    //no watch
+    gulp.task( 'webpackProduction' , function(){
+        webpack( webpackProduction , function( err, state ){
+            //
+        }) ;
     }) ;
 })() ;
